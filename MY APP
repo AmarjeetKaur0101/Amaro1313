@@ -92,8 +92,8 @@ if uploaded_file and keywords:
         resume_text += pdf_reader.getPage(page).extractText()
 
     # Fetch jobs based on keywords
-    app_id = "your_app_id"   # Replace with your Adzuna app_id
-    app_key = "your_app_key" # Replace with your Adzuna app_key
+    app_id = "Amaro1313"   # Replace with your Adzuna app_id
+    app_key = "9adf8da3dd3e191436201f6050a2282d" # Replace with your Adzuna app_key
     jobs = fetch_ai_jobs(app_id, app_key, keywords=keywords)
 
     if jobs:
