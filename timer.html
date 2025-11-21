@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Timer</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #0b1021;
+      --panel: #141a32;
+      --accent: #7c3aed;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at 10% 20%, rgba(124, 58, 237, 0.08), transparent 25%),
+        radial-gradient(circle at 80% 0, rgba(99, 102, 241, 0.12), transparent 25%),
+        var(--bg);
+      color: var(--text);
+      font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      padding: 32px;
+    }
+
+    .card {
+      background: var(--panel);
+      border-radius: 16px;
+      padding: 28px 32px;
+      width: min(420px, 100%);
+      box-shadow: var(--shadow);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    h1 {
+      margin: 0 0 12px;
+      font-size: 1.8rem;
+      letter-spacing: -0.01em;
+    }
+
+    p {
+      margin: 0 0 24px;
+      color: var(--muted);
+    }
+
+    .timer {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 18px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .time {
+      font-size: 2.4rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+    }
+
+    .controls {
+      display: flex;
+      gap: 10px;
+    }
+
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-weight: 600;
+      cursor: pointer;
+      color: #0b1021;
+      background: var(--text);
+      transition: transform 120ms ease, box-shadow 120ms ease;
+      box-shadow: 0 8px 20px rgba(124, 58, 237, 0.28);
+    }
+
+    button.secondary {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid rgba(255, 255, 255, 0.18);
+      box-shadow: none;
+    }
+
+    button:active { transform: translateY(1px); }
+
+    @media (max-width: 480px) {
+      .time { font-size: 2rem; }
+      .controls { flex-direction: column; width: 100%; }
+      button { width: 100%; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+  <div class="card" aria-live="polite">
+    <h1>Simple Timer</h1>
+    <p>Start, pause, and reset a millisecond-accurate stopwatch.</p>
+    <div class="timer">
+      <span class="time" id="display">00:00:00.000</span>
+      <div class="controls">
+        <button id="startPause">Start</button>
+        <button class="secondary" id="reset">Reset</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const display = document.getElementById("display");
+    const startPauseBtn = document.getElementById("startPause");
+    const resetBtn = document.getElementById("reset");
+
+    let startTime = 0;
+    let elapsed = 0;
+    let rafId = null;
+
+    const formatTime = (ms) => {
+      const milliseconds = Math.floor(ms % 1000);
+      const seconds = Math.floor(ms / 1000) % 60;
+      const minutes = Math.floor(ms / 60000) % 60;
+      const hours = Math.floor(ms / 3600000);
+
+      const pad = (val, size = 2) => String(val).padStart(size, "0");
+      return `${pad(hours)}:${pad(minutes)}:${pad(seconds)}.${pad(milliseconds, 3)}`;
+    };
+
+    const update = () => {
+      const now = performance.now();
+      const diff = now - startTime + elapsed;
+      display.textContent = formatTime(diff);
+      rafId = requestAnimationFrame(update);
+    };
+
+    const start = () => {
+      startTime = performance.now();
+      rafId = requestAnimationFrame(update);
+      startPauseBtn.textContent = "Pause";
+      startPauseBtn.dataset.state = "running";
+    };
+
+    const pause = () => {
+      cancelAnimationFrame(rafId);
+      elapsed += performance.now() - startTime;
+      startPauseBtn.textContent = "Start";
+      startPauseBtn.dataset.state = "paused";
+    };
+
+    const reset = () => {
+      cancelAnimationFrame(rafId);
+      startTime = 0;
+      elapsed = 0;
+      display.textContent = "00:00:00.000";
+      startPauseBtn.textContent = "Start";
+      startPauseBtn.dataset.state = "paused";
+    };
+
+    startPauseBtn.addEventListener("click", () => {
+      if (startPauseBtn.dataset.state === "running") {
+        pause();
+      } else {
+        start();
+      }
+    });
+
+    resetBtn.addEventListener("click", reset);
+    startPauseBtn.dataset.state = "paused";
+  </script>
+</body>
+</html>
